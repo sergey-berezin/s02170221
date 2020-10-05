@@ -10,7 +10,6 @@ using Microsoft.ML.OnnxRuntime;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.ML.OnnxRuntime;
 using System.IO;
 using System.Collections.Concurrent;
 using System.Threading;
@@ -22,7 +21,8 @@ namespace NeuralNetwork
         InferenceSession session;
         public List<Task> taskList;
         CancellationTokenSource cancelTokenSource;
-        public event Action<string> OnProcessedPicture;
+        public event Action OnAllTasksFinished; //завершение обработки всех картинок
+        public event Action<string> OnProcessedPicture; //завершение обработки одной картинки
 
         public MNIST()
         {            
@@ -48,10 +48,14 @@ namespace NeuralNetwork
                         
                     }
                 }
+
+                Task.Run(() => {
+                    Task.WaitAll(taskList.ToArray());
+                    OnAllTasksFinished();
+                    });
             }
             else throw new Exception("Directory doesn't exist");
         }
-
         public void Cancel()
         {
             Console.WriteLine("Cancel");
@@ -93,9 +97,9 @@ namespace NeuralNetwork
 
             using IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = session.Run(inputs);
 
-            //Утяжеление задачи, чтобы проверить, как выполняются таски на ядрах
-            //int k = 1; 
-            //for (int i=1; i<100000000; i++)
+            ////Утяжеление задачи, чтобы проверить, как выполняются таски на ядрах
+            //int k = 1;
+            //for (int i = 1; i < 100000000; i++)
             //    k = k * i;
 
             // Получаем 1000 выходов и считаем для них softmax
