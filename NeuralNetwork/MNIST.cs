@@ -19,10 +19,10 @@ namespace NeuralNetwork
     public class MNIST
     {
         InferenceSession session;
-        public List<Task> taskList;
+        List<Task> taskList;
         CancellationTokenSource cancelTokenSource;
         public event Action OnAllTasksFinished; //завершение обработки всех картинок
-        public event Action<string> OnProcessedPicture; //завершение обработки одной картинки
+        public event Action<PictureInfo> OnProcessedPicture; //завершение обработки одной картинки
 
         public MNIST()
         {            
@@ -39,14 +39,10 @@ namespace NeuralNetwork
                 string[] files = Directory.GetFiles(dirName);
                 foreach (string s in files)
                 {
-                    if (s.Contains(".jpg") || s.Contains(".jpeg") || s.Contains(".png") || s.Contains(".bmp"))
-                    {
-                        taskList.Add(Task.Factory.StartNew(() =>
+                    taskList.Add(Task.Factory.StartNew(() =>
                         {
                             OnProcessedPicture(ProcessPicture(s));
                         }, cancelTokenSource.Token));
-                        
-                    }
                 }
 
                 Task.Run(() => {
@@ -61,7 +57,7 @@ namespace NeuralNetwork
             Console.WriteLine("Cancel");
             cancelTokenSource.Cancel();
         }
-        string ProcessPicture(string pictureName)
+        PictureInfo ProcessPicture(string pictureName)
         {
             using var image = Image.Load<Rgb24>(pictureName);
 
@@ -110,10 +106,13 @@ namespace NeuralNetwork
             var softmax = output.Select(x => (float)Math.Exp(x) / sum);
 
             // Выдаем наиболее вероятный результат на экран
-            return softmax
+            var result = softmax
                 .Select((x, i) => new { Label = classLabels[i], Confidence = x })
                 .OrderByDescending(x => x.Confidence)
-                .FirstOrDefault().Label;           
+                .FirstOrDefault();
+
+            return new PictureInfo(pictureName, result.Label, result.Confidence);
+            
         }
 
         static readonly string[] classLabels = new[]
