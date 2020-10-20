@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OnnxLab1", "OnnxLab1.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NeuralNetwork", "..\NeuralNetwork\NeuralNetwork.csproj", "{EDE5C8BB-CA24-4540-A054-239384241ADE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPF_Lab2", "..\WPF_Lab2\WPF_Lab2.csproj", "{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewModel", "..\ViewModel\ViewModel.csproj", "{C50B85A5-A71D-4E78-B4D4-431CC079E620}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +35,22 @@ Global
 		{EDE5C8BB-CA24-4540-A054-239384241ADE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EDE5C8BB-CA24-4540-A054-239384241ADE}.Release|x64.ActiveCfg = Release|Any CPU
 		{EDE5C8BB-CA24-4540-A054-239384241ADE}.Release|x64.Build.0 = Release|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Debug|x64.Build.0 = Debug|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Release|x64.ActiveCfg = Release|Any CPU
+		{3EC1CC68-1AB6-4DDF-B713-6CDAF0550577}.Release|x64.Build.0 = Release|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Debug|x64.Build.0 = Debug|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Release|x64.ActiveCfg = Release|Any CPU
+		{C50B85A5-A71D-4E78-B4D4-431CC079E620}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
