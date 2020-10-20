@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,9 +9,9 @@ namespace NeuralNetwork
 {
     public class PictureInfo
     {
-        public string Path;
+        public string Path { get; set; }
 
-        public string TypeName;
+        public string TypeName { get; set; }
 
         public float Confidence;
 
@@ -25,5 +26,6 @@ namespace NeuralNetwork
         {
             return "Path: " + Path + ", Class: " + TypeName + ", Confidence: " + Confidence + ";";
         }
+
     }
 }

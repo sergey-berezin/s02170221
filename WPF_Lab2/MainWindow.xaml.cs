@@ -30,6 +30,7 @@ namespace WPF_Lab2
             myAppUIServices = new MyAppUIServices();
             mainViewModel = new MainViewModel(myAppUIServices);
             DataContext = mainViewModel;
+            ListBox_Types.SelectionChanged += (s, e) => mainViewModel.ApplySelection(ListBox_Types.SelectedItem);
         }
 
         public class MyAppUIServices : IUIServices
@@ -41,6 +42,12 @@ namespace WPF_Lab2
                     return folderBrowserDialog.SelectedPath;
                 return null;
             }
+        }
+
+        //Не знаю, как правильно снять выделение с ListBox, поэтому реализовала через кнопку
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            ListBox_Types.SelectedItem = null;
         }
     }
 }

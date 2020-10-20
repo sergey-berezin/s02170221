@@ -11,7 +11,7 @@ namespace ViewModel
 {
     public class ObservablePictureLibrary : ObservableCollection<ObservablePictureType>
     {
-        public string args;
+        public object SelectedItem;
         public ObservablePictureLibrary()
         {
             foreach (var p in MNIST.classLabels)
@@ -38,6 +38,17 @@ namespace ViewModel
                     break;
                 }
             }
+        }
+
+        public IEnumerable<PictureInfo> GetProcessedImages()
+        {
+            if (SelectedItem == null)
+                foreach (var type in base.Items)
+                    foreach (var picture in type)
+                        yield return picture;
+            else
+                foreach (var picture in SelectedItem as ObservablePictureType)
+                    yield return picture;
         }
     }
 }

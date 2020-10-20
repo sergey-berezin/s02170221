@@ -26,18 +26,17 @@ namespace ViewModel
 
         private bool canOpen;
 
-        private bool canStop;
-
-        public string Count { get; set; }
-
         private ObservablePictureLibrary observablePictureLibrary;
 
-        public IEnumerable<ObservablePictureType> Library { get => observablePictureLibrary; private set { } }
+        public IEnumerable<PictureInfo> ShowedImages { get => observablePictureLibrary.GetProcessedImages(); }
+
+        public IEnumerable<ObservablePictureType> Library { get => observablePictureLibrary; }
 
         private int processedCount;
 
         public string Progress { get => (processedCount * 100 / neuralNetwork.Count).ToString() + " %" ; }
-        public string Exception { get; set; }
+
+        //public string Exception { get; set; }
 
         private readonly ICommand openCommand;
 
@@ -49,17 +48,17 @@ namespace ViewModel
 
         public ICommand OpenCommand { get => openCommand; }
         public ICommand StopCommand { get => stopCommand; }
+
+
         public MainViewModel(IUIServices uIServices)
         {
             this.uIServices = uIServices;
             dispatcher = Dispatcher.CurrentDispatcher;
-            Exception = "Good";
+            //Exception = "Good";
             neuralNetwork = new MNIST();
-            try
-            {
-                observablePictureLibrary = new ObservablePictureLibrary();
-            }
-            catch(Exception ex) { Exception = ex.Message; OnPropertyChanged("Exception"); }
+            canOpen = true;
+            observablePictureLibrary = new ObservablePictureLibrary();
+            
             neuralNetwork.OnProcessedPicture += (s) =>
             {
                 dispatcher.Invoke( () => 
@@ -68,25 +67,22 @@ namespace ViewModel
                     {
                         processedCount++;
                         OnPropertyChanged("Progress");
-                      try
-                      {
-                            
-                            observablePictureLibrary.AddPictureInfo(result);
-                      }
-                      catch(Exception ex){ Exception = ex + ex.Message; OnPropertyChanged("Exception"); }
+                      //try
+                      //{
+                        observablePictureLibrary.AddPictureInfo(result);
+                      //}
+                      //catch(Exception ex){ Exception = ex + ex.Message; OnPropertyChanged("Exception"); }
+                        OnPropertyChanged("ShowedImages");
                     }
                 });              
             };
 
             neuralNetwork.OnAllTasksFinished += () => { 
                 dispatcher.Invoke(() => { canOpen = true; 
-                    canStop = false; 
                     CommandManager.InvalidateRequerySuggested(); 
                 });
             };
-            Count = "5";
-            canOpen = true;
-            canStop = false;
+
 
             openCommand = new RelayCommand(_ => canOpen,
                 _ => {directory = uIServices.ConfirmOpen();
@@ -94,12 +90,17 @@ namespace ViewModel
                         l.Clear();
                     if (directory != null)
                     {
-                        canOpen = false; canStop = true; processedCount = 0; OnPropertyChanged("Progress");
+                        canOpen = false; processedCount = 0; OnPropertyChanged("Progress");
                         neuralNetwork.ScanDirectory(directory);
                     }
                 }); 
 
-            stopCommand = new RelayCommand(_ => canStop, _ => { canOpen = true; canStop = false; neuralNetwork.Cancel(); });
+            stopCommand = new RelayCommand(_ => !canOpen, _ => { canOpen = true; neuralNetwork.Cancel(); });
+        }
+        public void ApplySelection(object selectedItem)
+        {
+            observablePictureLibrary.SelectedItem = selectedItem;
+            OnPropertyChanged("ShowedImages");
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")

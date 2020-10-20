@@ -32,6 +32,7 @@ namespace NeuralNetwork
             session = new InferenceSession("model.onnx");// Создает сессию для предсказания нейросетью
             queue = new ConcurrentQueue<PictureInfo>();
         }
+
         public Task ScanDirectory(string dirName)
         {
             taskList = new List<Task>();
@@ -63,6 +64,7 @@ namespace NeuralNetwork
                 return null;
             }
         }
+
         public void Cancel()
         {
             //Console.WriteLine("Cancel");
