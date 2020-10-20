@@ -33,36 +33,29 @@ namespace NeuralNetwork
             queue = new ConcurrentQueue<PictureInfo>();
         }
 
-        public Task ScanDirectory(string dirName)
+        public Task ScanDirectory(IEnumerable<string> files)
         {
+            
             taskList = new List<Task>();
             
-            if (Directory.Exists(dirName))
+            cancelTokenSource = new CancellationTokenSource();
+
+            foreach (string s in files)
             {
-                cancelTokenSource = new CancellationTokenSource();
-
-                string[] files = Directory.GetFiles(dirName);
-                foreach (string s in files)
-                {
-                    taskList.Add(Task.Factory.StartNew( (path) =>
-                        {
-                            var job = ProcessPicture((string)path);
-                            queue.Enqueue(job);
-                            OnProcessedPicture?.Invoke(job);
-                        }, s, cancelTokenSource.Token));
-                }
-
-                return Task.Run(() =>
+                 taskList.Add(Task.Factory.StartNew( (path) =>
                     {
+                         var job = ProcessPicture((string)path);
+                         queue.Enqueue(job);
+                         OnProcessedPicture?.Invoke(job);
+                    }, s, cancelTokenSource.Token));
+            }
+
+            return Task.Run(() =>
+                {
+                    if (taskList.Count != 0)
                         Task.WaitAll(taskList.ToArray());
-                        OnAllTasksFinished();
-                    });
-            }
-            else
-            {
-                OnAllTasksFinished();
-                return null;
-            }
+                    OnAllTasksFinished();
+                });          
         }
 
         public void Cancel()
@@ -104,7 +97,7 @@ namespace NeuralNetwork
 
             ////Утяжеление задачи, чтобы проверить, как выполняются таски на ядрах
             //int k = 1;
-            //for (int i = 1; i < 100000000; i++)
+            //for (int i = 1; i < 500000000; i++)
             //    k = k * i;
 
             // Получаем 1000 выходов и считаем для них softmax
@@ -124,6 +117,16 @@ namespace NeuralNetwork
             
         }
 
+        public static IEnumerable<string> GetFilesFromDirectory(string dirName)
+        {
+            if (Directory.Exists(dirName))
+            {
+                foreach (var f in Directory.GetFiles(dirName))
+                    yield return f;
+            }
+            else 
+                yield return null;
+        }
         Bitmap ResizeImage(Image image, int width, int height)
         {
             var destRect = new Rectangle(0, 0, width, height);

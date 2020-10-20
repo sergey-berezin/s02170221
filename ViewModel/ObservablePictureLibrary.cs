@@ -12,6 +12,8 @@ namespace ViewModel
     public class ObservablePictureLibrary : ObservableCollection<ObservablePictureType>
     {
         public object SelectedItem;
+
+        public IEnumerable<string> AllPathes;
         public ObservablePictureLibrary()
         {
             foreach (var p in MNIST.classLabels)
@@ -42,13 +44,32 @@ namespace ViewModel
 
         public IEnumerable<PictureInfo> GetProcessedImages()
         {
-            if (SelectedItem == null)
-                foreach (var type in base.Items)
-                    foreach (var picture in type)
-                        yield return picture;
-            else
+            if (SelectedItem == null && AllPathes != null)
+            {
+                bool flag = false;
+                foreach (var path in AllPathes)
+                {
+                    flag = false;
+                    foreach (var type in base.Items)
+                    {
+                        foreach (var picture in type)
+                            if (path == picture.Path)
+                            {
+                                yield return picture;
+                                flag = true;
+                                break;
+                            }
+                        if (flag)
+                            break;
+                    }
+                    if (!flag)
+                        yield return new PictureInfo(path, "", 0);
+                }
+            }
+            else if (AllPathes != null)
                 foreach (var picture in SelectedItem as ObservablePictureType)
                     yield return picture;
+
         }
     }
 }

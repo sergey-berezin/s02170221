@@ -92,7 +92,9 @@ namespace ViewModel
                     if (directory != null)
                     {
                         canOpen = false; processedCount = 0; OnPropertyChanged("Progress");
-                        neuralNetwork.ScanDirectory(directory);
+                        var files = MNIST.GetFilesFromDirectory(directory);
+                        observablePictureLibrary.AllPathes = files;
+                        neuralNetwork.ScanDirectory(files);
                     }
                 }); 
 
