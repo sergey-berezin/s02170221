@@ -78,7 +78,8 @@ namespace ViewModel
             };
 
             neuralNetwork.OnAllTasksFinished += () => { 
-                dispatcher.Invoke(() => { canOpen = true; 
+                dispatcher.Invoke(() => { 
+                    canOpen = true; 
                     CommandManager.InvalidateRequerySuggested(); 
                 });
             };
