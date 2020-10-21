@@ -96,9 +96,9 @@ namespace NeuralNetwork
             IDisposableReadOnlyCollection<DisposableNamedOnnxValue> results = session.Run(inputs);
 
             ////Утяжеление задачи, чтобы проверить, как выполняются таски на ядрах
-            //int k = 1;
-            //for (int i = 1; i < 500000000; i++)
-            //    k = k * i;
+            int k = 1;
+            for (int i = 1; i < 100000000; i++)
+                k = k * i;
 
             // Получаем 1000 выходов и считаем для них softmax
             var output = results.First().AsEnumerable<float>().ToArray();

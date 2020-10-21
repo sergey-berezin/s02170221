@@ -26,11 +26,11 @@ namespace ViewModel
 
         private bool canOpen;
 
-        private ObservablePictureLibrary observablePictureLibrary;
+        private PictureLibrary pictureLibrary;
 
-        public IEnumerable<PictureInfo> ShowedImages { get => observablePictureLibrary.GetProcessedImages(); }
+        public IEnumerable<PictureInfo> ShowedImages { get => pictureLibrary?.GetProcessedImages(); }
 
-        public IEnumerable<ObservablePictureType> Library { get => observablePictureLibrary; }
+        public IEnumerable<ObservablePictureType> Library { get => pictureLibrary?.Items; }
 
         private int processedCount;
 
@@ -57,7 +57,6 @@ namespace ViewModel
             //Exception = "Good";
             neuralNetwork = new MNIST();
             canOpen = true;
-            observablePictureLibrary = new ObservablePictureLibrary();
             
             neuralNetwork.OnProcessedPicture += (s) =>
             {
@@ -66,13 +65,14 @@ namespace ViewModel
                     if (neuralNetwork.queue.TryDequeue(out PictureInfo result))
                     {
                         processedCount++;
-                        OnPropertyChanged("Progress");
+                        OnPropertyChanged(nameof(Progress));
                       //try
                       //{
-                        observablePictureLibrary.AddPictureInfo(result);
+                        pictureLibrary.AddPictureInfo(result);
                       //}
                       //catch(Exception ex){ Exception = ex + ex.Message; OnPropertyChanged("Exception"); }
-                        OnPropertyChanged("ShowedImages");
+                        OnPropertyChanged(nameof(ShowedImages));
+                      //OnPropertyChanged(nameof(Library));
                     }
                 });              
             };
@@ -84,16 +84,22 @@ namespace ViewModel
                 });
             };
 
-
             openCommand = new RelayCommand(_ => canOpen,
                 _ => {directory = uIServices.ConfirmOpen();
-                    foreach (var l in Library)
-                        l.Clear();
+                    if (pictureLibrary != null)
+                        foreach (var l in Library)
+                            l.Clear();
                     if (directory != null)
                     {
-                        canOpen = false; processedCount = 0; OnPropertyChanged("Progress");
+                        canOpen = false; processedCount = 0; OnPropertyChanged(nameof(Progress));
                         var files = MNIST.GetFilesFromDirectory(directory);
-                        observablePictureLibrary.AllPathes = files;
+                        if (pictureLibrary == null)
+                        {
+                            pictureLibrary = new PictureLibrary(files);
+                            OnPropertyChanged(nameof(Library));
+                        }
+                        else
+                            pictureLibrary.AllPathes = files;
                         neuralNetwork.ScanDirectory(files);
                     }
                 }); 
@@ -102,8 +108,8 @@ namespace ViewModel
         }
         public void ApplySelection(object selectedItem)
         {
-            observablePictureLibrary.SelectedItem = selectedItem;
-            OnPropertyChanged("ShowedImages");
+            pictureLibrary.SelectedItem = selectedItem;
+            OnPropertyChanged(nameof(ShowedImages));
         }
 
         public void OnPropertyChanged([CallerMemberName] string prop = "")

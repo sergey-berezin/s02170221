@@ -9,17 +9,21 @@ using System.Threading.Tasks;
 
 namespace ViewModel
 {
-    public class ObservablePictureLibrary : ObservableCollection<ObservablePictureType>
+    public class PictureLibrary
     {
         public object SelectedItem;
 
+        public IEnumerable<ObservablePictureType> Items;
+
         public IEnumerable<string> AllPathes;
-        public ObservablePictureLibrary()
+        public PictureLibrary(IEnumerable<string> allPathes)
         {
+            AllPathes = allPathes;
+            Items = new List<ObservablePictureType>();
             foreach (var p in MNIST.classLabels)
             {
                 var pictureType = new ObservablePictureType(p);
-                base.Add(pictureType);
+                (Items as List<ObservablePictureType>).Add(pictureType); 
                 ////когда изменяется любой объект PictureType (т.е. когда добавляется новая обработанная картинка PictureInfo):
                 //pictureType.CollectionChanged += (s, e) =>
                 //{
@@ -32,7 +36,7 @@ namespace ViewModel
 
         public void AddPictureInfo(PictureInfo pictureInfo)
         {
-            foreach (var type in base.Items)
+            foreach (var type in Items)
             {
                 if (type.TypeName == pictureInfo.TypeName)
                 {
@@ -50,7 +54,7 @@ namespace ViewModel
                 foreach (var path in AllPathes)
                 {
                     flag = false;
-                    foreach (var type in base.Items)
+                    foreach (var type in Items)
                     {
                         foreach (var picture in type)
                             if (path == picture.Path)

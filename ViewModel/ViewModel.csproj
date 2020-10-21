@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainViewModel.cs" />
-    <Compile Include="ObservablePictureLibrary.cs" />
+    <Compile Include="PictureLibrary.cs" />
     <Compile Include="ObservablePictureType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RelayCommand.cs" />
