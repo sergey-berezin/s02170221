@@ -1,0 +1,38 @@
+﻿<Window x:Class="WPF_Lab2.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WPF_Lab2"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="423" Width="800">
+    <Window.Resources>
+        <DataTemplate x:Key="ListBox_Template">
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Class: "/>
+                <TextBlock Text="{Binding Path=TypeName}"/>
+                <TextBlock Text=";   Count: "/>
+                <TextBlock Text="{Binding Path=Count}"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ImagePanel_Template">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Path=Path}" Width="50" Height="50" />
+                <TextBlock Text="Class: "/>
+                <TextBlock Text="{Binding Path=TypeName}"/>
+            </StackPanel>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid Margin="0,0,-27,-21">
+        <ToolBar HorizontalAlignment="Left" Height="35" Margin="10,10,0,0" VerticalAlignment="Top" Width="327" RenderTransformOrigin="0.5,0.5">
+            <Button Content="Open Directiory" Command="{Binding OpenCommand}" Margin="0,4" Width="138"/>
+            <Button Content="Stop Proccessing" Command="{Binding StopCommand}" Margin="0,4" Width="145"/>
+        </ToolBar>
+        <TextBlock HorizontalAlignment="Left" Margin="392,25,0,0" TextWrapping="Wrap" Text="{Binding Path=Progress}" VerticalAlignment="Top"/>
+        <ListBox Name ="ListBox_Types" ItemsSource="{Binding Path=Library}" ItemTemplate="{StaticResource ListBox_Template}" HorizontalAlignment="Left" Height="264" Margin="484,93,0,0" VerticalAlignment="Top" Width="268"/>
+        <!--<TextBlock Text="{Binding Path=Exception}" HorizontalAlignment="Left" Margin="602,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="128"/>-->
+        <ListBox ItemsSource="{Binding Path=ShowedImages}" ItemTemplate="{StaticResource ImagePanel_Template}" HorizontalAlignment="Left" Height="264" Margin="37,93,0,0" VerticalAlignment="Top" Width="393"/>
+        <Button Content="Show all pictures" HorizontalAlignment="Left" Margin="521,17,0,0" VerticalAlignment="Top" Width="108" Height="24" Click="Button_Click"/>
+    </Grid>
+</Window>

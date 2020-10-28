@@ -20,7 +20,7 @@ namespace OnnxLab1
 
             try
             {
-                neuralNetwork.ScanDirectory(dirName);
+                neuralNetwork.ScanDirectory(MNIST.GetFilesFromDirectory(dirName));
             }
             catch (Exception ex)
             {
