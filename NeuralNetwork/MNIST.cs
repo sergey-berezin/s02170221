@@ -33,7 +33,7 @@ namespace NeuralNetwork
             queue = new ConcurrentQueue<PictureInfo>();
         }
 
-        public Task ScanDirectory(IEnumerable<string> files)
+        public Task ScanDirectory(IEnumerable<string> files) //сюда попадут только необработанные картинки
         {
             
             taskList = new List<Task>();
@@ -62,6 +62,12 @@ namespace NeuralNetwork
         {
             //Console.WriteLine("Cancel");
             cancelTokenSource.Cancel();
+        }
+
+        public void FakeProcessedPicture(PictureInfo pictureInfo)
+        {
+            queue.Enqueue(pictureInfo);
+            OnProcessedPicture(pictureInfo);
         }
 
         PictureInfo ProcessPicture(string pictureName)
@@ -113,7 +119,7 @@ namespace NeuralNetwork
                 .OrderByDescending(x => x.Confidence)
                 .FirstOrDefault();
 
-            return new PictureInfo(pictureName, result.Label, result.Confidence);
+            return new PictureInfo(pictureName, result.Label);
             
         }
 
