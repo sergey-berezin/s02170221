@@ -11,18 +11,22 @@ namespace ViewModel
 {
     public class PictureLibrary
     {
-        public object SelectedItem;
+        public object SelectedItem; //Выбранный пользователем класс в правом ListBox для просмотра всех изображений в этом классе
 
-        public IEnumerable<ObservablePictureType> Items;
+        public IEnumerable<ObservablePictureType> Items; //Все классы, которые распознает нейронная сеть
 
-        public IEnumerable<string> AllPathes;
+        public IEnumerable<string> AllPathes; //Все пути из заданной директории 
+
+        public PictureLibraryContext PictureLibraryContext;
+
         public PictureLibrary(IEnumerable<string> allPathes)
         {
             AllPathes = allPathes;
             Items = new List<ObservablePictureType>();
+            PictureLibraryContext = new PictureLibraryContext();
             foreach (var p in MNIST.classLabels)
             {
-                var pictureType = new ObservablePictureType(p);
+                var pictureType = new ObservablePictureType(p, PictureLibraryContext);
                 (Items as List<ObservablePictureType>).Add(pictureType); 
                 ////когда изменяется любой объект PictureType (т.е. когда добавляется новая обработанная картинка PictureInfo):
                 //pictureType.CollectionChanged += (s, e) =>
@@ -36,11 +40,14 @@ namespace ViewModel
 
         public void AddPictureInfo(PictureInfo pictureInfo)
         {
+            if (PictureLibraryContext.UnknownPictures.Contains(pictureInfo.Path)) //если картинка не была найдена в БД
+                PictureLibraryContext.AddPictureInfo(pictureInfo);
             foreach (var type in Items)
             {
                 if (type.TypeName == pictureInfo.TypeName)
                 {
                     type.Add(pictureInfo);
+                    type.OnStatisicChanged();
                     break;
                 }
             }
@@ -67,7 +74,7 @@ namespace ViewModel
                             break;
                     }
                     if (!flag)
-                        yield return new PictureInfo(path, "", 0);
+                        yield return new PictureInfo(path, "");
                 }
             }
             else if (AllPathes != null)

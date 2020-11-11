@@ -13,18 +13,15 @@ namespace NeuralNetwork
 
         public string TypeName { get; set; }
 
-        public float Confidence;
-
-        public PictureInfo(string path, string type, float confidence)
+        public PictureInfo(string path, string type)
         {
             Path = path;
             TypeName = type;
-            Confidence = confidence;
         }
 
         public override string ToString()
         {
-            return "Path: " + Path + ", Class: " + TypeName + ", Confidence: " + Confidence + ";";
+            return "Path: " + Path + ", Class: " + TypeName + ";";
         }
 
     }

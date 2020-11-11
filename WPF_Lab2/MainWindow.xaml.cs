@@ -49,5 +49,10 @@ namespace WPF_Lab2
         {
             ListBox_Types.SelectedItem = null;
         }
+
+        private void Button_Click_ClearDB(object sender, RoutedEventArgs e)
+        {
+            mainViewModel.ClearDB();
+        }
     }
 }
