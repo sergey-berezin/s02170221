@@ -3,9 +3,9 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using ViewModel;
+using Server;
 
-namespace ViewModel.Migrations
+namespace Server.Migrations
 {
     [DbContext(typeof(PictureLibraryContext))]
     partial class PictureLibraryContextModelSnapshot : ModelSnapshot
@@ -16,17 +16,17 @@ namespace ViewModel.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.0-rc.2.20475.6");
 
-            modelBuilder.Entity("ViewModel.PictureInfoDB", b =>
+            modelBuilder.Entity("Server.PictureInfoDB", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("PictureInfoDetailsId")
+                    b.Property<int>("HashCode")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ShortFileName")
-                        .HasColumnType("TEXT");
+                    b.Property<int?>("PictureInfoDetailsId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int?>("TypeId")
                         .HasColumnType("INTEGER");
@@ -40,7 +40,7 @@ namespace ViewModel.Migrations
                     b.ToTable("Pictures");
                 });
 
-            modelBuilder.Entity("ViewModel.PictureInfoDetails", b =>
+            modelBuilder.Entity("Server.PictureInfoDetails", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -54,7 +54,7 @@ namespace ViewModel.Migrations
                     b.ToTable("Details");
                 });
 
-            modelBuilder.Entity("ViewModel.PictureTypeDB", b =>
+            modelBuilder.Entity("Server.PictureTypeDB", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -68,13 +68,13 @@ namespace ViewModel.Migrations
                     b.ToTable("Types");
                 });
 
-            modelBuilder.Entity("ViewModel.PictureInfoDB", b =>
+            modelBuilder.Entity("Server.PictureInfoDB", b =>
                 {
-                    b.HasOne("ViewModel.PictureInfoDetails", "PictureInfoDetails")
+                    b.HasOne("Server.PictureInfoDetails", "PictureInfoDetails")
                         .WithMany()
                         .HasForeignKey("PictureInfoDetailsId");
 
-                    b.HasOne("ViewModel.PictureTypeDB", "Type")
+                    b.HasOne("Server.PictureTypeDB", "Type")
                         .WithMany("Pictures")
                         .HasForeignKey("TypeId");
 
@@ -83,7 +83,7 @@ namespace ViewModel.Migrations
                     b.Navigation("Type");
                 });
 
-            modelBuilder.Entity("ViewModel.PictureTypeDB", b =>
+            modelBuilder.Entity("Server.PictureTypeDB", b =>
                 {
                     b.Navigation("Pictures");
                 });

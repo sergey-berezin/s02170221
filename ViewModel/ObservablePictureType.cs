@@ -1,4 +1,4 @@
-﻿using NeuralNetwork;
+﻿using Contracts;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,17 +11,15 @@ namespace ViewModel
 {
     public class ObservablePictureType : ObservableCollection<PictureInfo>
     {
+        public string Statistic { get; set; }
         public string TypeName { get; set; }
 
-        public int Statistic { get => pictureLibraryContext.GetStatisticType(TypeName); }
-
-        private PictureLibraryContext pictureLibraryContext;
-
-        public ObservablePictureType(string name, PictureLibraryContext pictureLibraryContext)
+        public ObservablePictureType(string name)
         {
             this.TypeName = name;
-            this.pictureLibraryContext = pictureLibraryContext;
+            this.Statistic = "0";
         }
+
         public void OnStatisicChanged()
         {
             OnPropertyChanged(new PropertyChangedEventArgs(nameof(Statistic)));

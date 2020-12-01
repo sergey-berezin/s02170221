@@ -13,72 +13,17 @@ using System.Threading;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using Contracts;
 
 namespace NeuralNetwork
 {
     public class MNIST
     {
-        InferenceSession session;
-        public List<Task> taskList;
-        public int Count { get {
-                if (taskList == null) return 1; else return taskList.Count; } }
-
-        CancellationTokenSource cancelTokenSource;
-        public event Action OnAllTasksFinished; //завершение обработки всех картинок
-        public event Action<PictureInfo> OnProcessedPicture; //завершение обработки одной картинки
-        public ConcurrentQueue<PictureInfo> queue;
-        public MNIST()
+        InferenceSession session = new InferenceSession("model.onnx");// Создает сессию для предсказания нейросетью;
+        public string ProcessPicture(Bitmap bitmap)
         {
-            session = new InferenceSession("model.onnx");// Создает сессию для предсказания нейросетью
-            queue = new ConcurrentQueue<PictureInfo>();
-        }
-
-        public Task ScanDirectory(IEnumerable<string> files) //сюда попадут только необработанные картинки
-        {
-            
-            taskList = new List<Task>();
-            
-            cancelTokenSource = new CancellationTokenSource();
-
-            foreach (string s in files)
-            {
-                 taskList.Add(Task.Factory.StartNew( (path) =>
-                    {
-                         var job = ProcessPicture((string)path);
-                         queue.Enqueue(job);
-                         OnProcessedPicture?.Invoke(job);
-                    }, s, cancelTokenSource.Token));
-            }
-
-            return Task.Run(() =>
-                {
-                    if (taskList.Count != 0)
-                        Task.WaitAll(taskList.ToArray());
-                    OnAllTasksFinished();
-                });          
-        }
-
-        public void Cancel()
-        {
-            //Console.WriteLine("Cancel");
-            cancelTokenSource.Cancel();
-        }
-
-        public void FakeProcessedPicture(PictureInfo pictureInfo)
-        {
-            queue.Enqueue(pictureInfo);
-            OnProcessedPicture(pictureInfo);
-        }
-
-        PictureInfo ProcessPicture(string pictureName)
-        {
-            var image = Image.FromFile(pictureName);
-
             const int TargetWidth = 28;
             const int TargetHeight = 28;
-
-            // Изменяем размер картинки до 28 x 28
-            var bitmap = ResizeImage(image, TargetWidth, TargetHeight);
 
             // Перевод пикселов в тензор и нормализация
             DenseTensor<float> input = new DenseTensor<float>(new[] { 1, 1, TargetHeight, TargetWidth });
@@ -115,62 +60,12 @@ namespace NeuralNetwork
 
             // Выдаем наиболее вероятный результат на экран
             var result = softmax
-                .Select((x, i) => new { Label = classLabels[i], Confidence = x })
+                .Select((x, i) => new { Label = PictureInfo.classLabels[i], Confidence = x })
                 .OrderByDescending(x => x.Confidence)
                 .FirstOrDefault();
 
-            return new PictureInfo(pictureName, result.Label);
+            return result.Label;
             
         }
-
-        public static IEnumerable<string> GetFilesFromDirectory(string dirName)
-        {
-            if (Directory.Exists(dirName))
-            {
-                foreach (var f in Directory.GetFiles(dirName))
-                    yield return f;
-            }
-            else 
-                yield return null;
-        }
-        Bitmap ResizeImage(Image image, int width, int height)
-        {
-            var destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
-
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (var graphics = Graphics.FromImage(destImage))
-            {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                using (var wrapMode = new ImageAttributes())
-                {
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-            }
-
-            return destImage;
-        }
-
-        public static readonly string[] classLabels = new[]
-        {
-            "Zero",
-            "One",
-            "Two",
-            "Three",
-            "Four",
-            "Five",
-            "Six",
-            "Seven",
-            "Eight",
-            "Nine"
-        };
-        
     }
 }

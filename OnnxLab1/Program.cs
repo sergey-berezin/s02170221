@@ -15,7 +15,7 @@ namespace OnnxLab1
             string dirName = Console.ReadLine();
 
             MNIST neuralNetwork = new MNIST();
-            neuralNetwork.OnProcessedPicture += (s) => Console.WriteLine(s);
+            /*neuralNetwork.OnProcessedPicture += (s) => Console.WriteLine(s);
             neuralNetwork.OnAllTasksFinished += () => { Environment.Exit(0); };
 
             try
@@ -29,7 +29,7 @@ namespace OnnxLab1
             }
 
             while (Console.ReadKey().Key != ConsoleKey.Escape);
-            neuralNetwork.Cancel();
+            neuralNetwork.Cancel();*/
         }
     }
 }

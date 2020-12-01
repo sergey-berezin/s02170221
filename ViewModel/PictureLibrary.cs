@@ -1,4 +1,4 @@
-﻿using NeuralNetwork;
+﻿using Contracts;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,74 +13,70 @@ namespace ViewModel
     {
         public object SelectedItem; //Выбранный пользователем класс в правом ListBox для просмотра всех изображений в этом классе
 
-        public IEnumerable<ObservablePictureType> Items; //Все классы, которые распознает нейронная сеть
+        public List<ObservablePictureType> Items; //Все классы, которые распознает нейронная сеть
 
-        public IEnumerable<string> AllPathes; //Все пути из заданной директории 
-
-        public PictureLibraryContext PictureLibraryContext;
-
-        public PictureLibrary(IEnumerable<string> allPathes)
+        private List<PictureInfo> nonProcessedPictures; 
+        public PictureLibrary()
         {
-            AllPathes = allPathes;
             Items = new List<ObservablePictureType>();
-            PictureLibraryContext = new PictureLibraryContext();
-            foreach (var p in MNIST.classLabels)
+            nonProcessedPictures = new List<PictureInfo>();
+            foreach (var p in PictureInfo.classLabels)
             {
-                var pictureType = new ObservablePictureType(p, PictureLibraryContext);
+                var pictureType = new ObservablePictureType(p);
                 (Items as List<ObservablePictureType>).Add(pictureType); 
-                ////когда изменяется любой объект PictureType (т.е. когда добавляется новая обработанная картинка PictureInfo):
-                //pictureType.CollectionChanged += (s, e) =>
-                //{
-                //    args = "e.Action: " + e.Action + "\ne.NewItems: " + e.NewItems + "\ne.OldItems: " + e.OldItems + "\ne.NewStartingIndex: " + e.NewStartingIndex + "\ne.OldStartingIndex: " + e.OldStartingIndex;
-                //    //var arg = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, s as ObservablePictureType, base.Items.IndexOf(s as ObservablePictureType));
-                //    //OnCollectionChanged(e);
-                //};
             }
         }
 
         public void AddPictureInfo(PictureInfo pictureInfo)
         {
-            if (PictureLibraryContext.UnknownPictures.Contains(pictureInfo.Path)) //если картинка не была найдена в БД
-                PictureLibraryContext.AddPictureInfo(pictureInfo);
-            foreach (var type in Items)
+            PictureInfo buf = null;
+            if (string.IsNullOrEmpty(pictureInfo.TypeName))
+                nonProcessedPictures.Add(pictureInfo);
+            else
             {
-                if (type.TypeName == pictureInfo.TypeName)
+                foreach (var pic in nonProcessedPictures)
                 {
-                    type.Add(pictureInfo);
-                    type.OnStatisicChanged();
-                    break;
+                    if (pic.Data == pictureInfo.Data)
+                    {
+                        buf = pic;
+                        pic.TypeName = pictureInfo.TypeName;
+                        Items.Find((p) => p.TypeName == pic.TypeName).Add(pic);
+                        break;
+                        //type.OnStatisicChanged();
+                    }
                 }
+                if (buf != null)
+                    nonProcessedPictures.Remove(buf);
+                else
+                    nonProcessedPictures.Add(pictureInfo);
             }
         }
 
+        public ObservablePictureType AddStatistic(Transfer transfer)
+        {
+            var result = Items.Find((s) => s.TypeName == transfer.Name);
+                result.Statistic = transfer.DataToBase64;
+            return result;
+        }
+
+        /// <summary>
+        /// Показать картинки в зависимости от выбранного класса
+        /// </summary>
+        /// <returns></returns>
+
         public IEnumerable<PictureInfo> GetProcessedImages()
         {
-            if (SelectedItem == null && AllPathes != null)
+            if (SelectedItem == null)
             {
-                bool flag = false;
-                foreach (var path in AllPathes)
-                {
-                    flag = false;
-                    foreach (var type in Items)
-                    {
-                        foreach (var picture in type)
-                            if (path == picture.Path)
-                            {
-                                yield return picture;
-                                flag = true;
-                                break;
-                            }
-                        if (flag)
-                            break;
-                    }
-                    if (!flag)
-                        yield return new PictureInfo(path, "");
-                }
+                foreach (var nonpic in nonProcessedPictures)
+                    yield return nonpic;
+                foreach (var type in Items)
+                    foreach (var picture in type)
+                        yield return picture;
             }
-            else if (AllPathes != null)
+            else
                 foreach (var picture in SelectedItem as ObservablePictureType)
                     yield return picture;
-
         }
     }
 }
