@@ -9,35 +9,32 @@ using System.Windows.Input;
 using System.Windows;
 using System.Windows.Threading;
 using System.Threading;
-using NeuralNetwork;
+using System.Net.Http;
+using System.IO;
+using Contracts;
+using System.Collections.Concurrent;
 
 namespace ViewModel
 {
     public interface IUIServices
     {
         string ConfirmOpen();
+        void Warning();
     }
 
     public class MainViewModel : INotifyPropertyChanged
     {
-        MNIST neuralNetwork;
+        Client client;
 
         private IUIServices uIServices;
 
         private string directory;
-
-        private bool canOpen;
 
         private PictureLibrary pictureLibrary;
 
         public IEnumerable<PictureInfo> ShowedImages { get => pictureLibrary?.GetProcessedImages(); }
 
         public IEnumerable<ObservablePictureType> Library { get => pictureLibrary?.Items; }
-
-        private int processedCount;
-
-        private int pictureCount = 1;
-        public string Progress { get => (processedCount * 100 / pictureCount) + " %" ; }
 
         //public string Exception { get; set; }
 
@@ -52,64 +49,71 @@ namespace ViewModel
         public ICommand OpenCommand { get => openCommand; }
         public ICommand StopCommand { get => stopCommand; }
 
+        ConcurrentQueue<Transfer> queue;
+        ConcurrentQueue<Transfer> queueStatistic;
 
         public MainViewModel(IUIServices uIServices)
         {
+            queue = new ConcurrentQueue<Transfer>();
+            queueStatistic = new ConcurrentQueue<Transfer>();
             this.uIServices = uIServices;
             dispatcher = Dispatcher.CurrentDispatcher;
             //Exception = "Good";
-            neuralNetwork = new MNIST();
-            canOpen = true;
-
-            pictureLibrary = new PictureLibrary(null);
+            client = new Client();
+            
+            pictureLibrary = new PictureLibrary();
             OnPropertyChanged(nameof(Library));
 
-            neuralNetwork.OnProcessedPicture += (s) => dispatcher.Invoke(OnProcessedPictureHandler);              
 
-            neuralNetwork.OnAllTasksFinished += () => { 
-                dispatcher.Invoke(() => { 
-                    canOpen = true; 
-                    CommandManager.InvalidateRequerySuggested(); 
-                });
-            };
+            client.OnProcessedPicture += (s) => { queue.Enqueue(s);  dispatcher.Invoke(OnProcessedPictureHandler, DispatcherPriority.Background); };
+            client.OnGetStatistic += (s) => { queueStatistic.Enqueue(s); dispatcher.BeginInvoke(OnGetStatisticHandler, DispatcherPriority.Background); };
+            client.OnServerIsUnreacheble += () => dispatcher.BeginInvoke(() => uIServices.Warning()); 
+            client.LoadAllPictures();
 
-            openCommand = new RelayCommand(_ => canOpen,
+            openCommand = new RelayCommand(_ => true,
                 _ => {
                     directory = uIServices.ConfirmOpen();
                     foreach (var l in Library)
                             l.Clear();
                     if (directory != null)
                     {
-                        canOpen = false; processedCount = 0; OnPropertyChanged(nameof(Progress));
-                        var files = MNIST.GetFilesFromDirectory(directory);
-                        
-                        pictureLibrary.AllPathes = files;
-
-                        pictureLibrary.PictureLibraryContext.UnknownPictures.Clear();
-                        pictureCount = pictureLibrary.AllPathes.Count();
-                        foreach (var f in files)
-                        {
-                            var info = pictureLibrary.PictureLibraryContext.FindPicture(f);
-                            if (info != null)
-                                neuralNetwork.FakeProcessedPicture(info);
-                        }
-                        neuralNetwork.ScanDirectory(pictureLibrary.PictureLibraryContext.UnknownPictures);
+                        var files = GetFilesFromDirectory(directory);
+                        client.ScanDirectory(GetFilesFromDirectory(directory));
                     }
                 }); 
 
-            stopCommand = new RelayCommand(_ => !canOpen, _ => { canOpen = true; neuralNetwork.Cancel(); });
+            stopCommand = new RelayCommand(_ => true, _ => { client.Cancel(); });
         }
 
+        public static IEnumerable<string> GetFilesFromDirectory(string dirName)
+        {
+            if (Directory.Exists(dirName))
+            {
+                foreach (var f in Directory.GetFiles(dirName))
+                    yield return f;
+            }
+            else
+                yield return null;
+        }
+       
         private void OnProcessedPictureHandler()
         {
-            if (neuralNetwork.queue.TryDequeue(out PictureInfo result))
+            if (queue.TryDequeue(out Transfer result))
             {
-                processedCount++;
-                OnPropertyChanged(nameof(Progress));
-                pictureLibrary.AddPictureInfo(result);
+                pictureLibrary.AddPictureInfo(new PictureInfo(result));
                 OnPropertyChanged(nameof(ShowedImages));
             }
         }
+
+        private void OnGetStatisticHandler()
+        {
+            if (queueStatistic.TryDequeue(out Transfer result))
+            {
+                var p = pictureLibrary.AddStatistic(result);//для обновления статистики
+                p.OnStatisicChanged();
+            }
+        }
+
         public void ApplySelection(object selectedItem)
         {
             pictureLibrary.SelectedItem = selectedItem;
@@ -124,9 +128,12 @@ namespace ViewModel
 
         public void ClearDB()
         {
-            pictureLibrary.PictureLibraryContext.ClearDB();
-            foreach (var p in pictureLibrary.Items) //для обновления статистики
-                p.OnStatisicChanged();
+            client.ClearDB();
+        }
+
+        public void GetDbStatistic()
+        {
+            client.GetDbStatistic();
         }
     }
 }

@@ -13,13 +13,13 @@
                 <TextBlock Text="{Binding Path=TypeName}"/>
                 <TextBlock Text=";   Count: "/>
                 <TextBlock Text="{Binding Path=Count}"/>
-                <TextBlock Text=";   Statistic: "/>
+                <TextBlock Text=";   Last statistic: "/>
                 <TextBlock Text="{Binding Path=Statistic}"/>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ImagePanel_Template">
             <StackPanel Orientation="Horizontal">
-                <Image Source="{Binding Path=Path}" Width="50" Height="50" />
+                <Image Source="{Binding Path=BitmapSource}" Width="50" Height="50" />
                 <TextBlock Text="Class: "/>
                 <TextBlock Text="{Binding Path=TypeName}"/>
             </StackPanel>
@@ -31,11 +31,13 @@
             <Button Content="Open Directiory" Command="{Binding OpenCommand}" Margin="0,4" Width="138"/>
             <Button Content="Stop Proccessing" Command="{Binding StopCommand}" Margin="0,4" Width="145"/>
         </ToolBar>
-        <TextBlock HorizontalAlignment="Left" Margin="392,25,0,0" TextWrapping="Wrap" Text="{Binding Path=Progress}" VerticalAlignment="Top"/>
+        <!--<TextBlock HorizontalAlignment="Left" Margin="392,25,0,0" TextWrapping="Wrap" Text="{Binding Path=Progress}" VerticalAlignment="Top"/>-->
         <ListBox Name ="ListBox_Types" ItemsSource="{Binding Path=Library}" ItemTemplate="{StaticResource ListBox_Template}" HorizontalAlignment="Left" Height="264" Margin="484,93,0,0" VerticalAlignment="Top" Width="268"/>
         <!--<TextBlock Text="{Binding Path=Exception}" HorizontalAlignment="Left" Margin="602,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="34" Width="128"/>-->
         <ListBox ItemsSource="{Binding Path=ShowedImages}" ItemTemplate="{StaticResource ImagePanel_Template}" HorizontalAlignment="Left" Height="264" Margin="37,93,0,0" VerticalAlignment="Top" Width="393"/>
-        <Button Content="Show all pictures" HorizontalAlignment="Left" Margin="484,21,0,0" VerticalAlignment="Top" Width="108" Height="24" Click="Button_Click"/>
+        <Button Content="Show all" HorizontalAlignment="Left" Margin="393,21,0,0" VerticalAlignment="Top" Width="108" Height="24" Click="Button_Click"/>
         <Button Content="Clear DB" HorizontalAlignment="Left" Margin="645,21,0,0" VerticalAlignment="Top" Height="24" Width="107" Click="Button_Click_ClearDB"/>
+        <Button Content="Get DB statistic" HorizontalAlignment="Left" Margin="521,21,0,0" VerticalAlignment="Top" Height="24" Width="107" Click="Button_Click_GetDbStatistic"/>
+
     </Grid>
 </Window>

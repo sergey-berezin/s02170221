@@ -42,6 +42,11 @@ namespace WPF_Lab2
                     return folderBrowserDialog.SelectedPath;
                 return null;
             }
+
+            public void Warning()
+            {
+                System.Windows.Forms.MessageBox.Show("Server is unreacheble");
+            }
         }
 
         //Не знаю, как правильно снять выделение с ListBox, поэтому реализовала через кнопку
@@ -53,6 +58,11 @@ namespace WPF_Lab2
         private void Button_Click_ClearDB(object sender, RoutedEventArgs e)
         {
             mainViewModel.ClearDB();
+        }
+
+        private void Button_Click_GetDbStatistic(object sender, RoutedEventArgs e)
+        {
+            mainViewModel.GetDbStatistic();
         }
     }
 }
