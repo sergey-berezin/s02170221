@@ -21,7 +21,7 @@ namespace ViewModel
     public class Client
     {
         public event Action<Transfer> OnProcessedPicture; //завершение обработки одной картинки
-        public event Action<Transfer> OnGetStatistic; //получили значение статистики для класса в transfer
+        //public event Action<Transfer> OnGetStatistic; //получили значение статистики для класса в transfer
         public event Action OnServerIsUnreacheble;
 
         private HttpClient httpClient = new HttpClient();
@@ -32,7 +32,7 @@ namespace ViewModel
         {
             try
             {
-                await httpClient.GetAsync("http://localhost:5000/api/Pictures/statistic");
+                await httpClient.GetAsync("http://localhost:5000/api/Statistic");
             }
             catch
             {
@@ -48,7 +48,7 @@ namespace ViewModel
                     taskList.Add(Task.Factory.StartNew(async (path) =>
                     {
                         var bytes = File.ReadAllBytes(path as string);
-                        var transfer = new Transfer() { DataToBase64 = Convert.ToBase64String(bytes) };
+                        var transfer = new Transfer() { DataToBase64 = Convert.ToBase64String(bytes), Path = path as string};
                         OnProcessedPicture(transfer); //добавляем все картинки на экран без подписи класса
 
                         var getRequest = JsonConvert.SerializeObject(transfer);
@@ -79,42 +79,21 @@ namespace ViewModel
 
         public async void ClearDB()
         {
-            try
-            {
-               await httpClient.DeleteAsync("http://localhost:5000/api/Pictures");
-            }
-            catch
-            {
-                OnServerIsUnreacheble();
-            }
+           await httpClient.DeleteAsync("http://localhost:5000/api/Pictures");
         }
 
-        public async void LoadAllPictures()
+        public async IAsyncEnumerable<Transfer> LoadAllPictures()
         {
-            try
-            {
-                var result = await httpClient.GetStringAsync("http://localhost:5000/api/Pictures");
-                foreach (var i in JsonConvert.DeserializeObject<Transfer[]>(result))
-                    OnProcessedPicture(i);
-            }
-            catch
-            {
-                OnServerIsUnreacheble();
-            }
+            var result = await httpClient.GetStringAsync("http://localhost:5000/api/Pictures");
+            foreach (var i in JsonConvert.DeserializeObject<Transfer[]>(result))
+                yield return i;
         }
 
-        public async void GetDbStatistic()
-        {
-            try
-            {
-                var result = await httpClient.GetStringAsync("http://localhost:5000/api/Pictures/statistic");
-                foreach (var i in JsonConvert.DeserializeObject<Transfer[]>(result))
-                    OnGetStatistic(i);
-            }
-            catch
-            {
-                OnServerIsUnreacheble();
-            }
+        public async IAsyncEnumerable<Transfer> GetDbStatistic()
+        { 
+            var result = await httpClient.GetStringAsync("http://localhost:5000/api/Statistic");
+            foreach (var i in JsonConvert.DeserializeObject<Transfer[]>(result))
+                yield return i;
         }
     }
 }

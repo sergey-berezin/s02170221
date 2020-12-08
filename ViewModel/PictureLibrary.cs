@@ -15,11 +15,11 @@ namespace ViewModel
 
         public List<ObservablePictureType> Items; //Все классы, которые распознает нейронная сеть
 
-        private List<PictureInfo> nonProcessedPictures; 
+        public List<PictureInfo> NonProcessedPictures; 
         public PictureLibrary()
         {
             Items = new List<ObservablePictureType>();
-            nonProcessedPictures = new List<PictureInfo>();
+            NonProcessedPictures = new List<PictureInfo>();
             foreach (var p in PictureInfo.classLabels)
             {
                 var pictureType = new ObservablePictureType(p);
@@ -31,10 +31,10 @@ namespace ViewModel
         {
             PictureInfo buf = null;
             if (string.IsNullOrEmpty(pictureInfo.TypeName))
-                nonProcessedPictures.Add(pictureInfo);
+                NonProcessedPictures.Add(pictureInfo);
             else
             {
-                foreach (var pic in nonProcessedPictures)
+                foreach (var pic in NonProcessedPictures)
                 {
                     if (pic.Data == pictureInfo.Data)
                     {
@@ -46,9 +46,9 @@ namespace ViewModel
                     }
                 }
                 if (buf != null)
-                    nonProcessedPictures.Remove(buf);
+                    NonProcessedPictures.Remove(buf);
                 else
-                    nonProcessedPictures.Add(pictureInfo);
+                    NonProcessedPictures.Add(pictureInfo);
             }
         }
 
@@ -68,7 +68,7 @@ namespace ViewModel
         {
             if (SelectedItem == null)
             {
-                foreach (var nonpic in nonProcessedPictures)
+                foreach (var nonpic in NonProcessedPictures)
                     yield return nonpic;
                 foreach (var type in Items)
                     foreach (var picture in type)

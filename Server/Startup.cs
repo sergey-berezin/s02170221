@@ -43,6 +43,8 @@ namespace Server
 
             //app.UseAuthorization();
 
+            app.UseCors(b => b.AllowAnyOrigin().AllowAnyMethod());
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

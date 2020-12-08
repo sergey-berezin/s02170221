@@ -12,5 +12,7 @@ namespace Contracts
         public string DataToBase64 { get; set; }
 
         public string Name { get; set; }
+
+        public string Path { get; set; }
     }
 }
