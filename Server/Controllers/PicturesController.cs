@@ -18,7 +18,6 @@ namespace Server.Controllers
     public class PicturesController : ControllerBase
     {
         private PictureLibraryContext pictureLibraryContext;
-
         private MNIST mNIST;
         public PicturesController(PictureLibraryContext pictureLibraryContext)
         {
@@ -32,11 +31,14 @@ namespace Server.Controllers
             return pictureLibraryContext.GetAllContent().ToArray();
         }
 
-        [HttpGet("{statistic}")]
-        public Transfer[] Get(string statistic)
+        [HttpGet("{pageNumber}")]
+        public Transfer[] Get(int pageNumber)
         {
-
-            return pictureLibraryContext.GetAllStatistic().ToArray();
+            List<Transfer> answer = new List<Transfer>();
+            var result = pictureLibraryContext.GetAllContent().ToList();
+            for (int i = pageNumber * 10; i < Math.Min((pageNumber + 1) * 10, result.Count); i++)
+                answer.Add(result[i]);
+            return answer.ToArray();
         }
 
         [HttpPut]
@@ -67,4 +69,24 @@ namespace Server.Controllers
                 pictureLibraryContext.ClearDB();
         }
     }
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class StatisticController : ControllerBase
+    {
+        private PictureLibraryContext pictureLibraryContext;
+        private MNIST mNIST;
+
+        public StatisticController(PictureLibraryContext pictureLibraryContext)
+        {
+            this.pictureLibraryContext = pictureLibraryContext;
+            mNIST = new MNIST();
+        }
+        [HttpGet]
+        public Transfer[] Get()
+        {
+            return pictureLibraryContext.GetAllStatistic().ToArray();
+        }
+    }
+
 }

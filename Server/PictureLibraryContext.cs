@@ -23,6 +23,8 @@ namespace Server
 
         public int HashCode { get; set; }
 
+        public string Path { get; set; }
+
         public PictureTypeDB Type { get; set; }
 
         public PictureInfoDetails PictureInfoDetails { get; set; }
@@ -91,6 +93,7 @@ namespace Server
                 Types.Add(p.Type);
             }
             p.PictureInfoDetails.BinaryFile = Convert.FromBase64String(transfer.DataToBase64);
+            p.Path = transfer.Path;
             p.HashCode = transfer.DataToBase64.GetHashCode();
             Details.Add(p.PictureInfoDetails);
             Pictures.Add(p);
@@ -127,6 +130,7 @@ namespace Server
                 var transfer = new Transfer();
                 transfer.DataToBase64 = Convert.ToBase64String(p.PictureInfoDetails.BinaryFile);
                 transfer.Name = p.Type.TypeName;
+                transfer.Path = p.Path;
                 yield return transfer;
             }
         }

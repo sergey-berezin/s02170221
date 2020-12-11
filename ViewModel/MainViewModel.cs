@@ -66,15 +66,17 @@ namespace ViewModel
 
 
             client.OnProcessedPicture += (s) => { queue.Enqueue(s);  dispatcher.Invoke(OnProcessedPictureHandler, DispatcherPriority.Background); };
-            client.OnGetStatistic += (s) => { queueStatistic.Enqueue(s); dispatcher.BeginInvoke(OnGetStatisticHandler, DispatcherPriority.Background); };
+            //client.OnGetStatistic += (s) => { queueStatistic.Enqueue(s); dispatcher.BeginInvoke(OnGetStatisticHandler, DispatcherPriority.Background); };
             client.OnServerIsUnreacheble += () => dispatcher.BeginInvoke(() => uIServices.Warning()); 
-            client.LoadAllPictures();
+            LoadAllPictures();
 
             openCommand = new RelayCommand(_ => true,
                 _ => {
                     directory = uIServices.ConfirmOpen();
                     foreach (var l in Library)
                             l.Clear();
+                    pictureLibrary.NonProcessedPictures.Clear();
+                    OnPropertyChanged(nameof(Library));
                     if (directory != null)
                     {
                         var files = GetFilesFromDirectory(directory);
@@ -126,14 +128,49 @@ namespace ViewModel
                 PropertyChanged(this, new PropertyChangedEventArgs(prop));
         }
 
-        public void ClearDB()
+        public async void ClearDB()
         {
-            client.ClearDB();
+            try
+            {
+                client.ClearDB();
+            }
+            catch
+            {
+                await dispatcher.BeginInvoke(() => uIServices.Warning());
+            }
         }
 
-        public void GetDbStatistic()
+        public async void GetDbStatistic()
         {
-            client.GetDbStatistic();
+            try
+            {
+                await foreach (var i in client.GetDbStatistic())
+                {
+                    queueStatistic.Enqueue(i);
+                    await dispatcher.BeginInvoke(OnGetStatisticHandler, DispatcherPriority.Background);
+                }
+            }
+            catch
+            {
+                await dispatcher.BeginInvoke(() => uIServices.Warning());
+            }
+            
+        }
+
+        public async void LoadAllPictures()
+        {
+            try
+            {
+                await foreach (var i in client.LoadAllPictures())
+                {
+                    queue.Enqueue(i);
+                    dispatcher.Invoke(OnProcessedPictureHandler, DispatcherPriority.Background);
+                }
+            }
+            catch
+            {
+                await dispatcher.BeginInvoke(() => uIServices.Warning());
+            }
         }
     }
 }
